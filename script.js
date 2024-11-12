@@ -272,7 +272,6 @@ stockInput.addEventListener('change', function(event) {
 });
 
 
-/*
 // LOCALSTORAGE
 const localStorageKey = 'watchedStock';
 
@@ -307,4 +306,3 @@ chartButtons.forEach(btn => {
 
 
 window.onload = loadWatchedStock;
-*/
