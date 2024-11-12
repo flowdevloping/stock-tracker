@@ -253,6 +253,12 @@ stockInput.addEventListener('change', function(event) {
                 // Adding EventListener to every stock element found
                 li.addEventListener('click', function() {
                     stockSymbol = data[i]['symbol'];
+
+                    // Handling peculiarity of yfinance for BTCUSD symbol
+                    if (stockSymbol === 'BTCUSD') {
+                        stockSymbol = 'BTC-USD';
+                    }
+
                     stockSymbolText.id = stockSymbol;
                     stockName = data[i]['name'];
                     stockNameText.id = stockName;
