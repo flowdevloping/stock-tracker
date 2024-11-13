@@ -339,9 +339,3 @@ chartButtons.forEach(btn => {
 
 window.onload = loadWatchedStock;
 
-// Optional: Initialize Flowbite manually if required
-document.addEventListener('DOMContentLoaded', () => {
-    const tooltip = new Tooltip(document.querySelector('[data-tooltip-target="tooltip-right"]'), {
-        placement: 'right',
-    });
-});
