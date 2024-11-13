@@ -18,25 +18,28 @@
 <body>
     <section>
         <div id="clock">
-            <div id="date">
+            <div id="date-div">
                 <span id="day"></span>
                 <span id="month"></span>
                 <span id="year"></span>
             </div>
-            <div id="time">
+            <div id="time-div">
                 <span id="hour"></span>
                 <span id="minute"></span>
                 <span id="seconds"></span>
+            </div>
+            <div id="timezone-div">
+                <span id="timezone"></span>
             </div>
         </div>
         
         <div class="card-container">
             <div class="content-container">
                 <div class="card-image"></div>
-                <div class="info-container">
-                    
+
+                <div class="info-container">    
                     <div id="wrapper">
-                        <div id="wrapper">
+                        <div>
                             <input type="search" class="input-symbol" id="stock-input" placeholder="NVDA">
                             <ul class="search-list hidden" id="stock-search-results"></ul>
                         </div>
@@ -45,40 +48,38 @@
                             <h3 class="stock-name"></h3>
                         </div>
                         </div>
-                    <div id="symbol-info-wrapper">
-                        <div class="wrapper_h">
-                            <h2><span id="price-span"></span></h2> 
-                            <button id="update-price-btn">update</button>
-                        </div>
+                        <div id="symbol-info-wrapper">
+                            <div class="wrapper-h">
+                                <h2><span id="price-span"></span></h2>
+                                <div id="loader-update-price" class="loader hide"></div>
+                                <button id="update-price-btn">update</button>
+                            </div>
 
-                        <div class="wrapper-update" data-tooltip-target="tooltip-right" data-tooltip-placement="right" type="button" class="ms-3 mb-2 md:mb-0 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <span id="date-span"></span>
-                            <span id="time-span"></span>
-                        </div>
+                            <div class="wrapper-update" data-tooltip-target="tooltip-right" data-tooltip-placement="right" type="button" class="ms-3 mb-2 md:mb-0 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <span id="date-span"></span>
+                                <span id="time-span"></span>
+                            </div>
 
-                        <div id="tooltip-right" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                            Last Update
-                            <div class="tooltip-arrow" data-popper-arrow></div>
+                            <div id="tooltip-right" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                Last Update
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
                         </div>
-                    </div>
                     
                     <div class="chart-wrapper">
-                        <div class="chart-buttons">
-                            <div id="graph-buttons">
+                            <div class="chart-buttons">
+                                    <div id="loader-update-chart" class="loader hide" ></div> 
+                                    <div id="timeframe-buttons">
+                                        <button class="chart-button" id="1d">24h</button>
+                                        <button class="chart-button" id="5d">5d</button>
+                                        <button class="chart-button clicked" id="1mo">1mo</button>
+                                        <button class="chart-button" id="3mo">3mo</button>
+                                        <button class="chart-button" id="1y">1y</button>
+                                        <button class="chart-button" id="max">Max</button>
+                                    </div>
                             </div>
-                            <div id="timeframe-buttons">
-                                <button class="chart-button" id="1d">24h</button>
-                                <button class="chart-button" id="7d">7d</button>
-                                <button class="chart-button clicked" id="1mo">1mo</button>
-                                <button class="chart-button" id="3mo">3mo</button>
-                                <button class="chart-button" id="1y">1y</button>
-                                <button class="chart-button" id="max">Max</button>
-                            </div>
-                        </div>
                         <div id='chart-container'></div><!-- Plotly chart will be drawn inside this DIV -->
-
                     </div>  
-
                 </div>
             </div>
         </div>        

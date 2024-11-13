@@ -78,7 +78,7 @@ section {
 }
 
 .card-image {
-    height: 6.25rem;
+    height: 7rem;
     background-color: #f79413;
 }
 
@@ -93,7 +93,6 @@ section {
     transition: 0.5s ease;
     position: relative;
     overflow: scroll;
-    margin-top: 1rem;
 }
 
 @media (max-width: 600px) {
@@ -105,29 +104,34 @@ section {
 #symbol-info-wrapper {
     display: flex;
     flex-direction: column;
-    gap:0rem;
+    justify-content: center;
+    gap: 0.125rem;
 }
 
 #clock {
     padding:1rem;
     display:flex;
-    gap: 0.125rem;
+    gap: 0.05rem;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-left: auto;
-    margin-right: 1rem;
-    width: 3rem;
+    width: fit-content;
     border-radius: 0.5rem; 
 }
 
-#date,
-#time {
+#date-div,
+#time-div,
+#timezone-div {
     display:flex;
 }
 
-#date {
+#date-div {
     font-size:0.8rem;
+}
+
+#timezone {
+    font-size: 0.75rem;
 }
 
 #update-price-btn {
@@ -148,31 +152,31 @@ section {
     padding: 1.1rem 1.2rem;
 }
 
+#update-price-btn:hover {
+    transition: 0.2s;
+    scale:1.05;
+}
+
 #update-price-btn {
     margin-left: auto ;
 }
 
-
-
-
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
 .wrapper-h {
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .wrapper-update {
     display: flex;
-    width: fit-content;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-width: 80%;
     border-radius: 0.25rem;
     cursor: default;
     font-size: smaller;
-    gap: 0.3rem;   
+    gap: 0.125rem;   
 }
 
 .chart-wrapper {
@@ -192,7 +196,9 @@ section {
 .chart-buttons{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     width: 100%;
+    height: fit-content;
     justify-content: space-between;
     gap:0.5rem;
     background-color: #F1F5F9;
@@ -207,7 +213,7 @@ section {
 #graph-buttons {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
@@ -220,8 +226,8 @@ section {
     font-size: smaller;
     display: flex;
     justify-content: center;
+    align-items: center;
     border-radius: 0.5rem;
-
 }
 
 .chart-button:hover {
@@ -336,6 +342,24 @@ lh::-webkit-scrollbar {
     grid-template-columns: 0.5fr 1fr;
 }
 
-.hidden {
-    visibility: hidden;
-}
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 50px;
+    scale: 0.5;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: 
+      radial-gradient(farthest-side,#ffa516 94%,#0000) top/8px 8px no-repeat,
+      conic-gradient(#0000 30%,#ffa516);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+    animation: l13 1s infinite linear;
+  }
+  @keyframes l13{ 
+    100%{transform: rotate(1turn)}
+  }
+
+  .hide {
+    opacity: 0;
+  }
+
+  

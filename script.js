@@ -5,6 +5,7 @@ const priceSpan = document.getElementById('price-span');
 const dateSpan = document.getElementById('date-span');
 const timeSpan = document.getElementById('time-span');
 const clockDiv = document.getElementById('clock');
+const timeZoneSpan = document.getElementById('timezone');
 const daySpan = document.getElementById('day');
 const monthSpan = document.getElementById('month');
 const yearSpan = document.getElementById('year');
@@ -16,6 +17,9 @@ const chartContainer = document.getElementById('chart-container');
 const chartButtons = document.querySelectorAll('.chart-button');
 
 const updateButton = document.getElementById('update-price-btn');
+const loaderPrice = document.getElementById('loader-update-price');
+
+const loaderChart = document.getElementById('loader-update-chart');
 
 // LIVE CLOCK
 let date = new Date();
@@ -40,14 +44,17 @@ function hide(element){
     element.classList.add('hidden');
 }
 
-// LIVE PRICE
-function getCurrentPrice(stockSymbol) {
+
+// Update PRICE
+function updatePrice(stockSymbol) {
     console.log(`Trying to get current price of ${stockSymbol}`);
+    loaderPrice.classList.remove('hide');
     fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_live?symbol=${stockSymbol}`)
     .then(response => {
         if (!response.ok) {
             throw new Error(`Error whereas fetch. Status: ${response.status}`);
         }
+        loaderPrice.classList.add('hide');
         return response.json()
     })
     .then(data => {
@@ -55,20 +62,22 @@ function getCurrentPrice(stockSymbol) {
 
         if (!data) {
             throw new Error(`No Data found`);
-        }
+        };
 
-        
         const date = new Date(data[0]['date']).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'Europe/Berlin' // Explizit die deutsche Zeitzone angeben
         });
 
-        time = new Date(data[0]['date']).toLocaleTimeString()
 
+        time = new Date(data[0]['date']).toTimeString();
+        
         priceSpan.innerHTML = data[0]['close'];
         dateSpan.innerHTML = date;
-        timeSpan.innerHTML = time;   
+        timeSpan.innerHTML = time;
+        
 
         stockSymbolText.innerHTML = stockSymbol;
         stockSymbolText.id = stockSymbol;
@@ -94,6 +103,8 @@ function getCurrentPrice(stockSymbol) {
 // FETCH DIAGRAM DATA
 async function getData(symbol, time_frame) {
     try {
+        loaderChart.classList.remove('hide');
+
         const response = await fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_${time_frame}?symbol=${symbol}`);
         if (!response.ok) {
             throw new Error(`Error during fetch. Status: ${response.status}`);
@@ -105,6 +116,7 @@ async function getData(symbol, time_frame) {
         if (!data) {
             throw new Error(`No Data found`);
         }
+        loaderChart.classList.add('hide');
         return data;
     } catch (error) {
         console.log(error);
@@ -128,16 +140,21 @@ async function plotlyChart(symbol, time_frame) {
     let typeValue = 'candlestick';
     var trace;
 
-    if (time_frame === '1d' || time_frame === '7d') {
-        typeValue = "scatter";
+    if (time_frame === '1d' || time_frame === '5d') {
+        typeValue = "scatter"; // Ändere den Typ auf "scatter"
 
         trace = {
             x: unpack(ticker, 'date'),
             y: unpack(ticker, 'close'), // Stelle sicher, dass y definiert ist
             type: typeValue,
+            mode: 'lines+markers', // Kombiniert Linien und Punkte
+            marker: {
+                color: '#FF9708', // Farbe der Punkte
+                size: 4, // Größe der Punkte (kleinere Werte machen die Punkte kleiner)
+            },
             xaxis: 'x',
             yaxis: 'y',
-            line: {color: 'orange'},
+            line: {color: '#FF9708'},
         };
     } else {
         trace = {
@@ -150,8 +167,8 @@ async function plotlyChart(symbol, time_frame) {
             volume: unpack(ticker, 'volume'),
         
             // cutomise colors
-            increasing: {line: {color: 'orange'}},
-            decreasing: {line: {color: 'black'}},
+            increasing: {line: {color: '#FF9708'}},
+            decreasing: {line: {color: '#505050'}},
             
             type: typeValue,
             xaxis: 'x',
@@ -183,6 +200,7 @@ async function plotlyChart(symbol, time_frame) {
 function updateTime() {
     date = new Date();
 
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     day = date.getDate();
     month = date.getMonth()+1 ;
     year = date.getFullYear();
@@ -190,6 +208,7 @@ function updateTime() {
     minute = date.getMinutes();
     seconds = date.getSeconds();
 
+    timeZoneSpan.innerHTML = String(timezone);
     daySpan.innerHTML = String(day + '.').padStart(3, '0');
     monthSpan.innerHTML = String(month + '.').padStart(3, '0');
     yearSpan.innerHTML = String(year).padStart(4, '0');
@@ -260,10 +279,11 @@ stockInput.addEventListener('change', function(event) {
                     }
 
                     stockSymbolText.id = stockSymbol;
+
                     stockName = data[i]['name'];
                     stockNameText.id = stockName;
 
-                    getCurrentPrice(stockSymbol);
+                    updatePrice(stockSymbol);
                     plotlyChart(stockSymbol, '1mo');
                 });
 
@@ -285,7 +305,7 @@ function loadWatchedStock() {
     const storedStock = JSON.parse(localStorage.getItem(localStorageKey)) || [];
     console.log("storedStock");
     console.log(storedStock);
-    getCurrentPrice(storedStock.symbol);
+    updatePrice(storedStock.symbol);
     plotlyChart(storedStock.symbol, '1mo');
 };
 
@@ -296,15 +316,21 @@ function saveStockToLocalStorage(stock) {
 };
 
 
-updateButton.addEventListener('click', () => getCurrentPrice(stockSymbol));
+updateButton.addEventListener('click', function() {
+    stockSymbol = stockSymbolText.id;
+    updatePrice(stockSymbol);
+}); 
 
 setInterval(updateTime, 1000);
 
 // UPDATE PRICE
-window.onload = setTimeout(setInterval(getCurrentPrice(stockSymbol), 60*1000), (60-sec)*1000);
+window.onload = setTimeout(setInterval(updatePrice(stockSymbol), 60*1000), (60-sec)*1000);
 
 chartButtons.forEach(btn => {
     btn.addEventListener('click', function() {
+        stockSymbol = stockSymbolText.id;
+        console.log("TRYING TO FETCH DATA");
+        console.log(stockSymbol);
         plotlyChart(stockSymbol, btn.id);
         addClicked(btn, chartButtons);
     });
