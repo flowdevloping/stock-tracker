@@ -248,7 +248,7 @@ svg {
   }
 
 
-#wrapper {
+.stock-wrapper {
     position: relative;
     display: flex;
     flex-direction: column;
