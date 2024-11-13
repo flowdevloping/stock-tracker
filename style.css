@@ -261,6 +261,7 @@ input[type=search] {
     padding: 0.5rem;
     width: 50%;
     height: 2rem;
+    margin-bottom: 1rem;
 }
 
 #stock-input::-webkit-search-cancel-button{
