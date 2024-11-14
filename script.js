@@ -220,7 +220,7 @@ async function plotlyChart(symbol, time_frame) {
     var layout = {
         dragmode: 'zoom', // Enable zooming
         showlegend: false,
-        height: 450, // Set chart height
+        height: 350, // Set chart height
         autosize: true,
         xaxis: {
             rangeslider: {
