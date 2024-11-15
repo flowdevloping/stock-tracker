@@ -355,7 +355,7 @@ chartButtons.forEach(btn => {
     });
 });
 
-// WINDOW ONLOAD FUNCTIONS
+// Localstorage load on window load
 window.onload = loadWatchedStock; // Load the watched stock data from localStorage when the page is loaded
 
 
