@@ -166,7 +166,7 @@ async function getData(symbol, time_frame) {
             throw new Error(`No Data found`); // Throw error if no data is found
         }
         loaderChart.classList.add('hide'); // Hide loader after successful fetch
-        tooltipInput.classList.remove('hide'); // Hide error indicator after successful fetch
+        tooltipInput.classList.add('hide'); // Hide error indicator after successful fetch
         return data;
     } catch (error) {
         console.log(error); // Log errors
