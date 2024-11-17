@@ -247,79 +247,84 @@ async function plotlyChart(symbol, time_frame) {
     Plotly.newPlot(chartContainer, data, layout); // Render the chart
 };
 
-
+// variable used for input delay
+let debounceTimer;
 // STOCK TRACKER
-stockInput.addEventListener('change', function(event) {
+stockInput.addEventListener('input', function(event) {
     event.preventDefault(); // Prevent default form submission behavior
 
-    const KEYWORD_SEARCH = stockInput.value; // Retrieve the user input for stock search
-    const safeKeyword = encodeURIComponent(KEYWORD_SEARCH);
+    clearTimeout(debounceTimer); // Deletes timer before
 
-    if (!KEYWORD_SEARCH) {
-        // If input is empty, clear the search results and hide the results container
-        stockSearchResults.innerText = "";
-        hide(stockSearchResults);
-        return;
-    } else {
-        // Fetching stock symbols from the API using the search keyword
-        fetch(`https://financialmodelingprep.com/api/v3/search?query=${safeKeyword}&apikey=I15m655vBJh7IM0dQifurTL9cuLNDV9G`)
-        .then(response => {
-            // Handle errors if the network response is not ok
-            if (!response.ok) {
-                throw new Error(`Network response was not ok. Status: ${response.status}`);
-            }
-            return response.json(); // Parse the response JSON
-        })
-        .then(data => {
-            console.log("DATA"); // Debugging: Log the data received from the API
-            console.log(data);
-            stockSearchResults.innerText = ""; // Clear previous search results
+    debounceTimer = setTimeout(() => {
+        const KEYWORD_SEARCH = stockInput.value; // Retrieve the user input for stock search
+        const safeKeyword = encodeURIComponent(KEYWORD_SEARCH);
 
-            // Iterate over the stock data and dynamically create list items for each result
-            for (let i = 0; i < data.length; i++) {
-                let li = document.createElement('li'); // Create a list item
-                let symbol = document.createElement('span'); // Create a span for the stock symbol
-                let name = document.createElement('span'); // Create a span for the stock name
-                name.classList.add('search-symbol-name')
+        if (!KEYWORD_SEARCH) {
+            // If input is empty, clear the search results and hide the results container
+            stockSearchResults.innerText = "";
+            hide(stockSearchResults);
+            return;
+        } else {
+            // Fetching stock symbols from the API using the search keyword
+            fetch(`https://financialmodelingprep.com/api/v3/search?query=${safeKeyword}&apikey=I15m655vBJh7IM0dQifurTL9cuLNDV9G`)
+            .then(response => {
+                // Handle errors if the network response is not ok
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok. Status: ${response.status}`);
+                }
+                return response.json(); // Parse the response JSON
+            })
+            .then(data => {
+                console.log("DATA"); // Debugging: Log the data received from the API
+                console.log(data);
+                stockSearchResults.innerText = ""; // Clear previous search results
 
-                symbol.innerText = data[i]['symbol']; // Populate the symbol span with the stock symbol
-                name.innerText = data[i]['name']; // Populate the name span with the stock name
+                // Iterate over the stock data and dynamically create list items for each result
+                for (let i = 0; i < data.length; i++) {
+                    let li = document.createElement('li'); // Create a list item
+                    let symbol = document.createElement('span'); // Create a span for the stock symbol
+                    let name = document.createElement('span'); // Create a span for the stock name
+                    name.classList.add('search-symbol-name')
 
-                li.append(symbol); // Append the symbol to the list item
-                li.append(name); // Append the name to the list item
+                    symbol.innerText = data[i]['symbol']; // Populate the symbol span with the stock symbol
+                    name.innerText = data[i]['name']; // Populate the name span with the stock name
 
-                // Add unique ID and a CSS class to the list item
-                li.id = data[i]['symbol'];
-                li.classList.add('stock-search-item');
+                    li.append(symbol); // Append the symbol to the list item
+                    li.append(name); // Append the name to the list item
 
-                // Add a click event listener to handle stock selection
-                li.addEventListener('click', function() {
-                    stockSymbol = data[i]['symbol']; // Retrieve the selected stock's symbol
+                    // Add unique ID and a CSS class to the list item
+                    li.id = data[i]['symbol'];
+                    li.classList.add('stock-search-item');
 
-                    // Special case handling for BTCUSD to match yfinance's format
-                    if (stockSymbol === 'BTCUSD') {
-                        stockSymbol = 'BTC-USD';
-                    }
+                    // Add a click event listener to handle stock selection
+                    li.addEventListener('click', function() {
+                        stockSymbol = data[i]['symbol']; // Retrieve the selected stock's symbol
 
-                    stockSymbolText.id = stockSymbol; // Update the stockSymbolText element ID with the selected symbol
+                        // Special case handling for BTCUSD to match yfinance's format
+                        if (stockSymbol === 'BTCUSD') {
+                            stockSymbol = 'BTC-USD';
+                        }
 
-                    stockName = data[i]['name']; // Retrieve the selected stock's name
-                    stockNameText.id = stockName; // Update the stockNameText element ID with the selected name
+                        stockSymbolText.id = stockSymbol; // Update the stockSymbolText element ID with the selected symbol
 
-                    updatePrice(stockSymbol); // Call updatePrice function with the selected symbol
-                    plotlyChart(stockSymbol, '1mo'); // Call plotlyChart function with the selected symbol and a default timeframe
-                });
+                        stockName = data[i]['name']; // Retrieve the selected stock's name
+                        stockNameText.id = stockName; // Update the stockNameText element ID with the selected name
 
-                stockSearchResults.appendChild(li); // Append the list item to the search results container
-            }
-            stockSearchResults.classList.remove('hidden'); // Make the search results container visible
-        })
-        .catch(error => {
-            console.log(error); // Log any errors encountered during the fetch process
-            stockSearchResults.classList.remove('hidden'); // Make the search results container visible
-            stockSearchResults.innerText = "Error fetching stock data. Please try again later.";
-        });
-    }
+                        updatePrice(stockSymbol); // Call updatePrice function with the selected symbol
+                        plotlyChart(stockSymbol, '1mo'); // Call plotlyChart function with the selected symbol and a default timeframe
+                    });
+
+                    stockSearchResults.appendChild(li); // Append the list item to the search results container
+                }
+                stockSearchResults.classList.remove('hidden'); // Make the search results container visible
+            })
+            .catch(error => {
+                console.log(error); // Log any errors encountered during the fetch process
+                stockSearchResults.classList.remove('hidden'); // Make the search results container visible
+                stockSearchResults.innerText = "Error fetching stock data. Please try again later.";
+            });
+        }
+    }, 200); // -> specify delay time after input is accessed
 });
 
 // LOCALSTORAGE
