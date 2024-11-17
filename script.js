@@ -19,6 +19,8 @@ const loaderPrice = document.getElementById('loader-update-price'); // Loader an
 
 const loaderChart = document.getElementById('loader-update-chart'); // Loader animation for chart updates
 
+const tooltipInput = document.getElementById('tooltip-input'); 
+
 // LIVE CLOCK VARIABLES
 let date = new Date(); // Current date object
 let sec = date.getSeconds(); // Current seconds value
@@ -61,10 +63,14 @@ function updatePrice(stockSymbol) {
     fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_live?symbol=${stockSymbol}`)
     .then(response => {
         if (!response.ok) {
+            // Showing error indicator when fetch went wrong
+            tooltipInput.textContent = `${stockSymbol} not available on yahoofinance`;
+            tooltipInput.classList.remove('hide');
             // Handle errors during the fetch
-            throw new Error(`Error whereas fetch. Status: ${response.status}`);
+            throw new Error(`Error fetching data (updatePrice-function). Status: ${response.status}`);
         }
-        loaderPrice.classList.add('hide'); // Hide loader after fetch
+        tooltipInput.classList.add('hide'); // Hide error indicator after successful fetch
+        loaderPrice.classList.add('hide'); // Hide loader after successful fetch
         return response.json(); // Parse response JSON
     })
     .then(data => {
@@ -144,10 +150,13 @@ async function getData(symbol, time_frame) {
     // Function to fetch stock data for charts
     try {
         loaderChart.classList.remove('hide'); // Show loader during fetch
-
+        loaderPrice.classList.remove('hide'); // Show loader during the fetch process
         const response = await fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_${time_frame}?symbol=${symbol}`);
         if (!response.ok) {
-            throw new Error(`Error during fetch. Status: ${response.status}`); // Handle fetch errors
+            // Showing error indicator when fetch went wrong
+            tooltipInput.textContent = `${stockSymbol} not available on yahoofinance`;
+            tooltipInput.classList.remove('hide');
+            throw new Error(`Error fetching data (getData-function). Status: ${response.status}`); // Handle fetch errors
         }
         const data = await response.json();
         console.log('DATA FROM getData');
@@ -156,7 +165,8 @@ async function getData(symbol, time_frame) {
         if (!data) {
             throw new Error(`No Data found`); // Throw error if no data is found
         }
-        loaderChart.classList.add('hide'); // Hide loader after fetch
+        loaderChart.classList.add('hide'); // Hide loader after successful fetch
+        tooltipInput.classList.remove('hide'); // Hide error indicator after successful fetch
         return data;
     } catch (error) {
         console.log(error); // Log errors
