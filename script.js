@@ -60,7 +60,7 @@ function updatePrice(stockSymbol) {
     // Function to fetch and display the current stock price
     console.log(`Trying to get current price of ${stockSymbol}`);
     loaderPrice.classList.remove('hide'); // Show loader during the fetch process
-    fetch(`/api/price?symbol=${encodeURIComponent(stockSymbol)}`)
+    fetch(`/api/stock-tracker/price?symbol=${encodeURIComponent(stockSymbol)}`)
     .then(response => {
         if (!response.ok) {
             // Showing error indicator when fetch went wrong
@@ -166,7 +166,7 @@ async function getData(symbol, time_frame) {
     // Function to fetch stock data for charts
     try {
         loaderChart.classList.remove('hide'); // Show loader during fetch
-        const response = await fetch(`/api/history?symbol=${encodeURIComponent(symbol)}&range=${encodeURIComponent(time_frame)}`);
+        const response = await fetch(`/api/stock-tracker/history?symbol=${encodeURIComponent(symbol)}&range=${encodeURIComponent(time_frame)}`);
         if (!response.ok) {
             // Showing error indicator when fetch went wrong
             tooltipInput.textContent = response.status === 404 || response.status === 400
@@ -291,7 +291,7 @@ stockInput.addEventListener('input', function(event) {
             return;
         } else {
             // Fetching stock symbols from the API using the search keyword
-            fetch(`/api/search?query=${safeKeyword}`) // Own serverless proxy: the API key stays on the server
+            fetch(`/api/stock-tracker/search?query=${safeKeyword}`) // Own serverless proxy: the API key stays on the server
             .then(response => {
                 // Handle errors if the network response is not ok
                 if (!response.ok) {
