@@ -60,23 +60,24 @@ function updatePrice(stockSymbol) {
     // Function to fetch and display the current stock price
     console.log(`Trying to get current price of ${stockSymbol}`);
     loaderPrice.classList.remove('hide'); // Show loader during the fetch process
-    fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_live?symbol=${stockSymbol}`)
+    fetch(`/api/price?symbol=${encodeURIComponent(stockSymbol)}`)
     .then(response => {
         if (!response.ok) {
             // Showing error indicator when fetch went wrong
-            tooltipInput.textContent = `${stockSymbol} not available on yahoofinance`;
+            tooltipInput.textContent = response.status === 404 || response.status === 400
+                ? `${stockSymbol} not available on yahoofinance`
+                : 'Price service currently unavailable';
             tooltipInput.classList.remove('hide');
             // Handle errors during the fetch
             throw new Error(`Error fetching data (updatePrice-function). Status: ${response.status}`);
         }
         tooltipInput.classList.add('hide'); // Hide error indicator after successful fetch
-        loaderPrice.classList.add('hide'); // Hide loader after successful fetch
         return response.json(); // Parse response JSON
     })
     .then(data => {
         console.log(data);
 
-        if (!data) {
+        if (!data || data.length === 0) {
             throw new Error(`No Data found`); // Throw error if no data is received
         };
 
@@ -114,11 +115,26 @@ function updatePrice(stockSymbol) {
     })
     .catch(error => {
         console.log(error); // Log any errors that occur
+    })
+    .finally(() => {
+        loaderPrice.classList.add('hide'); // Always hide the loader, also after errors
     });
 }
 
 // Automatic price-update every minute
-window.onload = setTimeout(setInterval(updatePrice(stockSymbol), 60*1000), (60-sec)*1000); // Adjust initial delay to sync updates with the next minute
+function startAutoPriceUpdate() {
+    const delayToNextMinute = (60 - new Date().getSeconds()) * 1000; // Sync updates with the next full minute
+    setTimeout(() => {
+        const refresh = () => {
+            const currentSymbol = stockSymbolText.id; // Currently selected symbol
+            if (currentSymbol) {
+                updatePrice(currentSymbol);
+            }
+        };
+        refresh();
+        setInterval(refresh, 60 * 1000);
+    }, delayToNextMinute);
+}
 
 // LIVE CLOCK
 function updateTime() {
@@ -150,11 +166,12 @@ async function getData(symbol, time_frame) {
     // Function to fetch stock data for charts
     try {
         loaderChart.classList.remove('hide'); // Show loader during fetch
-        loaderPrice.classList.remove('hide'); // Show loader during the fetch process
-        const response = await fetch(`https://irp3olgj53.execute-api.eu-central-1.amazonaws.com/dev/get_price_${time_frame}?symbol=${symbol}`);
+        const response = await fetch(`/api/history?symbol=${encodeURIComponent(symbol)}&range=${encodeURIComponent(time_frame)}`);
         if (!response.ok) {
             // Showing error indicator when fetch went wrong
-            tooltipInput.textContent = `${stockSymbol} not available on yahoofinance`;
+            tooltipInput.textContent = response.status === 404 || response.status === 400
+                ? `${symbol} not available on yahoofinance`
+                : 'Chart service currently unavailable';
             tooltipInput.classList.remove('hide');
             throw new Error(`Error fetching data (getData-function). Status: ${response.status}`); // Handle fetch errors
         }
@@ -165,11 +182,12 @@ async function getData(symbol, time_frame) {
         if (!data) {
             throw new Error(`No Data found`); // Throw error if no data is found
         }
-        loaderChart.classList.add('hide'); // Hide loader after successful fetch
         tooltipInput.classList.add('hide'); // Hide error indicator after successful fetch
         return data;
     } catch (error) {
         console.log(error); // Log errors
+    } finally {
+        loaderChart.classList.add('hide'); // Always hide the loader, also after errors
     }
 }
 
@@ -177,6 +195,13 @@ async function getData(symbol, time_frame) {
 async function plotlyChart(symbol, time_frame) {
     // Function to create charts with Plotly
     ticker = await getData(symbol, time_frame); // Fetch data for the chart
+
+    if (!ticker || ticker.length === 0) {
+        // No data (request failed or market closed): clear the old chart and stop
+        Plotly.purge(chartContainer);
+        return;
+    }
+
     ticker.forEach(d => {
         d.date = new Date(d.date); // Convert dates to Date objects
     });
@@ -371,6 +396,9 @@ chartButtons.forEach(btn => {
 });
 
 // Localstorage load on window load
-window.onload = loadWatchedStock; // Load the watched stock data from localStorage when the page is loaded
+window.onload = function() {
+    loadWatchedStock(); // Load the watched stock data from localStorage when the page is loaded
+    startAutoPriceUpdate(); // Refresh the price every full minute
+};
 
 
