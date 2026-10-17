@@ -257,7 +257,7 @@ stockInput.addEventListener('input', function(event) {
 
     debounceTimer = setTimeout(() => {
         const KEYWORD_SEARCH = stockInput.value; // Retrieve the user input for stock search
-        const safeKeyword = encodeURIComponent(KEYWORD_SEARCH);
+        const safeKeyword = encodeURIComponent(KEYWORD_SEARCH); // Encode the stock search keyword to ensure it's a valid URL parameter (prevent injection attacks)
 
         if (!KEYWORD_SEARCH) {
             // If input is empty, clear the search results and hide the results container
@@ -266,7 +266,7 @@ stockInput.addEventListener('input', function(event) {
             return;
         } else {
             // Fetching stock symbols from the API using the search keyword
-            fetch(`https://financialmodelingprep.com/api/v3/search?query=${safeKeyword}&apikey=I15m655vBJh7IM0dQifurTL9cuLNDV9G`)
+            fetch(`/api/search?query=${safeKeyword}`) // Own serverless proxy: the API key stays on the server
             .then(response => {
                 // Handle errors if the network response is not ok
                 if (!response.ok) {
